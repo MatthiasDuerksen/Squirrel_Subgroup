@@ -2,7 +2,6 @@ package org.aksw.simba.squirrel.rabbit;
 
 import java.nio.ByteBuffer;
 
-import org.aksw.simba.squirrel.data.uri.serialize.Serializer;
 import org.hobbit.core.rabbit.RabbitMQUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,9 +15,7 @@ import com.google.gson.Gson;
  * 
  * @author Michael R&ouml;der (roeder@informatik.uni-leipzig.de)
  *
- * @deprecated Use one of the {@link Serializer} instead
  */
-@Deprecated
 public class RabbitMQHelper {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(RabbitMQHelper.class);

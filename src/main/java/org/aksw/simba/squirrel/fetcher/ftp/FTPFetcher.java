@@ -4,54 +4,26 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Set;
 
 import org.aksw.simba.squirrel.data.uri.CrawleableUri;
-import org.aksw.simba.squirrel.fetcher.Fetcher;
-import org.apache.commons.io.FileUtils;
+import org.aksw.simba.squirrel.data.uri.UriUtils;
+import org.aksw.simba.squirrel.fetcher.dump.DumpFetcher;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.net.ftp.FTPClient;
 import org.apache.commons.net.ftp.FTPReply;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/**
- * TODO Update this class by removing its dependency regarding the deprecated
- * {@link DumpFetcher} class.
- * 
- * @author Michael R&ouml;der (michael.roeder@uni-paderborn.de)
- *
- */
-public class FTPFetcher implements Fetcher {
+public class FTPFetcher extends DumpFetcher {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(FTPFetcher.class);
 
-    protected static final Set<String> ACCEPTED_SCHEMES = new HashSet<String>(Arrays.asList("ftp", "ftps"));
-
-    protected File dataDirectory = FileUtils.getTempDirectory();
-
     @Override
-    public File fetch(CrawleableUri uri) {
-        // Check whether this fetcher can handle the given URI
-        if ((uri == null) || (uri.getUri() == null) || (ACCEPTED_SCHEMES.contains(uri.getUri().getScheme()))) {
-            return null;
-        }
-        // create temporary file
-        File dataFile = null;
-        try {
-            dataFile = File.createTempFile("fetched_", "", dataDirectory);
-        } catch (IOException e) {
-            LOGGER.error("Couldn't create temporary file for storing fetched data. Returning null.", e);
-            return null;
-        }
-        return requestData(uri, dataFile);
-    }
-
-    private File requestData(CrawleableUri uri, File dataFile) {
-        // Download file to temp folder
+    protected String downloadFile(CrawleableUri uri, String tempfolder) {
+        // Download files to temp folder
         FTPClient client = new FTPClient();
+        String tempfile = UriUtils.generateFileName(uri.toString(), false);
+        File outputFile = new File(tempfolder, tempfile);
         OutputStream output = null;
         try {
             client.connect(uri.getIpAddress());
@@ -62,7 +34,7 @@ public class FTPFetcher implements Fetcher {
             }
 
             client.enterLocalPassiveMode();
-            output = new FileOutputStream(dataFile);
+            output = new FileOutputStream(outputFile);
             if (!client.retrieveFile(uri.getUri().getPath(), output)) {
                 LOGGER.error("Downloading {} was not succesful. Returning null.", uri.getUri().toString());
             }
@@ -77,12 +49,7 @@ public class FTPFetcher implements Fetcher {
             } catch (IOException e) {
             }
         }
-        return dataFile;
-    }
-
-    @Override
-    public void close() throws IOException {
-        // nothing to do
+        return outputFile.getPath();
     }
 
 }

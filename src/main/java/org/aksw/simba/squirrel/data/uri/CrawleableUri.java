@@ -1,14 +1,11 @@
 package org.aksw.simba.squirrel.data.uri;
 
-import java.io.Serializable;
 import java.net.InetAddress;
 import java.net.URI;
 import java.net.UnknownHostException;
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,9 +30,7 @@ import org.slf4j.LoggerFactory;
  * @author Michael R&ouml;der (roeder@informatik.uni-leipzig.de)
  *
  */
-public class CrawleableUri implements Serializable {
-
-    private static final long serialVersionUID = 1L;
+public class CrawleableUri {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CrawleableUri.class);
 
@@ -48,9 +43,7 @@ public class CrawleableUri implements Serializable {
      * 
      * @param bytes
      * @return
-     * @deprecated Use the JSON deserialization instead.
      */
-    @Deprecated
     public static CrawleableUri fromByteArray(byte bytes[]) {
         if ((bytes == null) || (bytes.length < URI_START_INDEX)) {
             return null;
@@ -59,12 +52,6 @@ public class CrawleableUri implements Serializable {
         return fromByteBuffer(ByteBuffer.wrap(bytes));
     }
 
-    /**
-     * 
-     * @param buffer
-     * @return
-     * @deprecated Use the JSON deserialization instead.
-     */
     public static CrawleableUri fromByteBuffer(ByteBuffer buffer) {
         if ((buffer == null) || ((buffer.limit() - buffer.position()) < URI_START_INDEX)) {
             return null;
@@ -109,20 +96,16 @@ public class CrawleableUri implements Serializable {
 
     private final URI uri;
     private InetAddress ipAddress;
-    @Deprecated
-    private UriType type = UriType.UNKNOWN;
-    private Map<String,Object> data = new HashMap<>();
+    private UriType type;
 
     public CrawleableUri(URI uri) {
-        this(uri, null);
+        this(uri, null, UriType.UNKNOWN);
     }
 
     public CrawleableUri(URI uri, InetAddress ipAddress) {
-        this.uri = uri;
-        this.ipAddress = ipAddress;
+        this(uri, ipAddress, UriType.UNKNOWN);
     }
 
-    @Deprecated
     public CrawleableUri(URI uri, InetAddress ipAddress, UriType type) {
         this.uri = uri;
         this.ipAddress = ipAddress;
@@ -137,38 +120,16 @@ public class CrawleableUri implements Serializable {
         this.ipAddress = ipAddress;
     }
 
-    @Deprecated
     public UriType getType() {
         return type;
     }
 
-    @Deprecated
     public void setType(UriType type) {
         this.type = type;
     }
 
     public URI getUri() {
         return uri;
-    }
-    
-    public void addData(String key, Object data) {
-        this.data.put(key, data);
-    }
-    
-    public Object getData(String key) {
-        if(data.containsKey(key)) {
-            return data.get(key);
-        } else {
-            return null;
-        }
-    }
-    
-    public Map<String, Object> getData() {
-        return data;
-    }
-    
-    public void setData(Map<String, Object> data) {
-        this.data = data;
     }
 
     @Override
@@ -196,11 +157,6 @@ public class CrawleableUri implements Serializable {
         return true;
     }
 
-    /**
-     * 
-     * @return
-     * @deprecated Use the JSON serialization instead.
-     */
     public ByteBuffer toByteBuffer() {
         byte uriBytes[] = uri.toString().getBytes(ENCODING_CHARSET);
         int bytesLength = 6 + uriBytes.length;
@@ -222,11 +178,6 @@ public class CrawleableUri implements Serializable {
         return buffer;
     }
 
-    /**
-     * 
-     * @return
-     * @deprecated Use the JSON serialization instead.
-     */
     public byte[] toByteArray() {
         return toByteBuffer().array();
     }
